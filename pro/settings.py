@@ -27,7 +27,7 @@ SECRET_KEY = 'zn*+*qc59gduyfsf(zjqfk(%w_zmsx(7r3*i069=d^eupu#(gt'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'https://floating-citadel-46144.herokuapp.com/']
 
 
 # Application definition
