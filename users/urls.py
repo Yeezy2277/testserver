@@ -1,0 +1,28 @@
+from django.urls import path
+from .views import * 
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView
+)
+
+
+urlpatterns = [
+    path('main/', PhotoList.as_view()), 
+    path('token/', TokenObtainPairView.as_view()), 
+    path('token/refresh/', TokenRefreshView.as_view()), 
+
+    path('register/', RegisterUser.as_view()), 
+
+
+    path('nomain/', RatingList.as_view()), 
+    path('info/', WorkWithUserData.as_view({'put': 'get_data_user'})), 
+    path('getcontract/', ClassPdf.as_view()), 
+
+    path('new-calculate/', Calculate.as_view({'post': 'create_sum'})), 
+
+
+    #test 
+    path('test-get-user/', test_header), 
+    path('test-get-user-passport/', PassportView.as_view({'post': 'set_passport'})),
+]
