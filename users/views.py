@@ -11,10 +11,10 @@ from .models import (
 )
 from .serializers import (
     MyPhotoSerializer, UserRatingSerializer,
-    DebtSerializer, NoMainInfoSerializer,
+    DebtSerializer, NoMainInfoUserSerializer,
     WorkInfoUserSerializer, AdressInfoUserSerializer, 
     PassportInfoUserSerializer, RegisterInfoUserSerializer, 
-    MainInfoUserSerializer
+    MainInfoUserSerializer, UserSerializer
 )
 
 from django.contrib.auth.models import User
@@ -49,9 +49,9 @@ class RegisterUser(APIView):
         try:
             user_name = request.data.get('username')
             user_password = request.data.get('password')
-        
+            
             #check users phone
-            numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+            numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
             for i in range(0, len(user_name)):
                 if user_name[i] not in numbers:
                     return Response(data={"detail": "not valied phone"}, status=status.HTTP_400_BAD_REQUEST)
@@ -62,31 +62,38 @@ class RegisterUser(APIView):
 
             #create different information of user
             a = MainInfoUser()
-            a.user = User.objects.get(username=user)
+            a.user = user
             a.save()
 
             b = RegisterInfoUser()
-            b.user = User.objects.get(username=user)
+            b.user = user
             b.save()
 
             c = PassportInfoUser()
-            c.user = User.objects.get(username=user)
+            c.user = user
             c.save()
 
             d = AdressInfoUser()
-            d.user = User.objects.get(username=user)
+            d.user = user
             d.save()
 
             e = WorkInfoUser()
-            e.user = User.objects.get(username=user)
+            e.user = user
             e.save()
 
             f = NoMainInfoUser()
-            f.user = User.objects.get(username=user)
+            f.user = user
             f.save()
 
+
+            #create rating for user
+            h = UserRating()
+            h.user = user
+            h.rating = 1
+            h.save()
+
             return Response(status=status.HTTP_200_OK)
-        except SyntaxError:
+        except:
             return Response(data={"detail": "this user in db"}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -206,118 +213,123 @@ class AdminFunc(ViewSet):
         
 
 class WorkWithUserData(ViewSet):
+    #get user with token
     def get_data_user(self, request):
-        user_name  = request.data.get('username')
-        #work with user's data
-        main_info = MainInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        main_info_serializer = MainInfoUserSerializer(
-            data=main_info
-        )
+        class MyJWTAuthentication(JWTAuthentication):
+            pass
+    
+        get_jwt_class = MyJWTAuthentication()
+        my_header = get_jwt_class.get_header(request)
+        my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+        my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+        my_user = get_jwt_class.get_user(my_valited_token)
+        
+        mainInfoUser = MainInfoUser.objects.get(user=my_user)
+        mainInfo = {
+            "sername": mainInfoUser.sername, 
+            "name": mainInfoUser.name, 
+            "second_name": mainInfoUser.second_name, 
+            "your_birthday": mainInfoUser.your_birthday, 
+            "tel": mainInfoUser.tel, 
+            "second_tel": mainInfoUser.second_tel, 
+            "your_mail": mainInfoUser.your_mail
+        }
 
-        #work with register
-        register_info = RegisterInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        register_info_serializer = RegisterInfoUserSerializer(
-            data=register_info
-        )
+        registerInfoUser = RegisterInfoUser.objects.get(user=my_user)
+        registerInfo = {
+            "register_index": registerInfoUser.register_index,
+            "register_city": registerInfoUser.register_city,
+            "register_street": registerInfoUser.register_street,
+            "register_house": registerInfoUser.register_house,
+            "register_flat": registerInfoUser.register_flat, 
+            "register_private_house": registerInfoUser.register_private_house,
+        }
+        
+        adressInfoUser = AdressInfoUser.objects.get(user=my_user)
+        adressInfo = {
+            "adress": adressInfoUser.adress,
+            "adress_index": adressInfoUser.adress_index, 
+            "adress_city": adressInfoUser.adress_city,
+            "adress_street": adressInfoUser.adress_street,
+            "adress_house": adressInfoUser.adress_house,
+            "adress_flat": adressInfoUser.adress_flat,
+            "adress_private_house": adressInfoUser.adress_private_house
+        }
 
-        #work with real adress 
-        adress_info = AdressInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        adress_info_serializer = AdressInfoUserSerializer(
-            data=request.data.get('adress_info_user')
-        )
+        workInfoUser =  WorkInfoUser.objects.get(user=my_user)
+        workInfo = {
+            "work_status": workInfoUser.work_status,
+            "work_name": workInfoUser.work_name, 
+            "work_tel": workInfoUser.work_tel,
+            "work_position": workInfoUser.work_position,
+            "work_years": workInfoUser.work_years
+        }
 
-        #work with work 
-        work_info = WorkInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        work_info_serializer = WorkInfoUserSerializer(
-            data=request.data.get('work_info_user')
-        )
-
-        #work with second user's data
-        second_info = NoMainInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        second_info_serializer = NoMainInfoSerializer(
-            data=request.data.get('second_info_user')
-        )
-
+        noMainInfo = NoMainInfoUser.objects.get(user=my_user)
+        noMain = {
+            "information_income": noMainInfo.information_income,
+            "information_family": noMainInfo.information_family, 
+            "information_education": noMainInfo.information_education,
+            "information_car": noMainInfo.information_car
+        }
+        
         return Response(data={
-            "username": user_name, 
-            "main_info": main_info_serializer.data, 
-            "register_info": register_info_serializer.data, 
-            "adress_info": adress_info_serializer.data,
-            "work_info": work_info_serializer.data, 
-            "second_info": second_info_serializer.data
+            "main_info": mainInfo, 
+            "register_info": registerInfo,
+            "adress_info": adressInfo, 
+            "work_info": workInfo, 
+            "other_information": noMain
         }, status=status.HTTP_200_OK)
 
     def put_data_user(self, request):
-        user_name  = request.data.get('username')
-        main_info = MainInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        main_info_serializer = MainInfoUserSerializer(
-            instance=main_info, 
-            data=request.data.get('main_info_user'), 
-            partial=True
-        )
-        if main_info_serializer.is_valid(raise_exception=True):
-            main_info_serializer.save()
+        class MyJWTAuthentication(JWTAuthentication):
+            pass
+    
+        get_jwt_class = MyJWTAuthentication()
+        my_header = get_jwt_class.get_header(request)
+        my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+        my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+        my_user = get_jwt_class.get_user(my_valited_token)
+
+        my_data = request.data
         
-        #update register data
-        register_info = RegisterInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        register_info_serializer = RegisterInfoUserSerializer(
-            instance=register_info, 
-            data=request.data.get('register_info_user'), 
-            partial=True
-        )
-        if register_info_serializer.is_valid(raise_exception=True):
-            register_info_serializer.save()
+        #work with main user's data
+        mainInfo = my_data.get('main_info')
+        mainInfo.update({'user': {'username': my_user.username}})
+        mainInfoUserSerializer = MainInfoUserSerializer(data=mainInfo)
+        if mainInfoUserSerializer.is_valid(raise_exception=True):
+            mainInfoUserSerializer.save()
 
-        #upgrade adress 
-        adress_info = AdressInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        adress_info_serializer = AdressInfoUserSerializer(
-            instance=register_info, 
-            data=request.data.get('adress_info_user'), 
-            partial=True
-        )
-        if adress_info_serializer.is_valid(raise_exception=True):
-            adress_info_serializer.save()
+        #work with register
+        registerInfo = my_data.get('register_info')
+        registerInfo.update({'user': {'username': my_user.username}})
+        registerInfoUserSerializer = RegisterInfoUserSerializer(data=registerInfo)
+        if registerInfoUserSerializer.is_valid(raise_exception=True):
+            registerInfoUserSerializer.save()
+        
 
-        #upgrade work
-        work_info = WorkInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        work_info_serializer = WorkInfoUserSerializer(
-            instance=work_info, 
-            data=request.data.get('work_info_user'), 
-            partial=True
-        )
-        if work_info_serializer.is_valid(raise_exception=True):
-            work_info_serializer.save()
+        #work with real adress 
+        adressInfo = request.data.get('adress_info')
+        adressInfo.update({'user': {'username': my_user.username}})
+        adressInfoUserSerializer = AdressInfoUserSerializer(data=adressInfo)
+        if adressInfoUserSerializer.is_valid(raise_exception=True):
+            adressInfoUserSerializer.save()
 
-        #upgrade second user's information
-        second_info = NoMainInfoUser.objects.get(
-            user=User.objects.get(username=user_name)
-        )
-        second_info_serializer = NoMainInfoSerializer(
-            instance=second_info, 
-            data=request.data.get('second_info_user'), 
-            partial=True
-        )
-        if second_info_serializer.is_valid(raise_exception=True):
-            second_info_serializer.save()
+        
+        #work with work
+        workInfo = request.data.get('work_info')
+        workInfo.update({'user': {'username': my_user.username}})
+        workInfoUserSerializer = WorkInfoUserSerializer(data=workInfo)
+        if workInfoUserSerializer.is_valid(raise_exception=True):
+            workInfoUserSerializer.save()
 
+        #work with no main
+        noMain = request.data.get('other_information')
+        noMain.update({'user': {'username': my_user.username}})
+        mainInfoUserSerializer = NoMainInfoUserSerializer(data=noMain)
+        if mainInfoUserSerializer.is_valid(raise_exception=True):
+            mainInfoUserSerializer.save()
+        
 
         return Response(status=status.HTTP_200_OK)
 
@@ -373,6 +385,7 @@ class PassportView(ViewSet):
             data=request.data, 
             partial=True
         )
+        
         if serializer.is_valid(raise_exception=True):
             serializer.save()
 

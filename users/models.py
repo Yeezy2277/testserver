@@ -71,11 +71,11 @@ class UserRating(models.Model):
 
 class Debt(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    debt_sum = models.IntegerField()
-    date_of_finish = models.DateField()
-    percent = models.IntegerField()
-    debt_admin_status = models.BooleanField()
-    debt_status = models.CharField(max_length=50)
+    debt_sum = models.IntegerField(null=True, blank=True)
+    date_of_finish = models.DateField(null=True, blank=True)
+    percent = models.IntegerField(null=True, blank=True)
+    debt_admin_status = models.BooleanField(null=True, blank=True)
+    debt_status = models.CharField(max_length=50, null=True, blank=True)
 
 class DebtCOntract(models.Model):
     debt = models.OneToOneField(Debt, on_delete=models.CASCADE, primary_key=True)

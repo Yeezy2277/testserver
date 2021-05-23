@@ -8,17 +8,17 @@ from rest_framework_simplejwt.views import (
 
 
 urlpatterns = [
-    path('main/', PhotoList.as_view()), 
     path('token/', TokenObtainPairView.as_view()), 
     path('token/refresh/', TokenRefreshView.as_view()), 
 
     path('register/', RegisterUser.as_view()), 
 
 
-    path('nomain/', RatingList.as_view()), 
-    path('info/', WorkWithUserData.as_view({'put': 'get_data_user'})), 
+    path('info/', WorkWithUserData.as_view({'post': 'get_data_user'})),
+    path('set-info/', WorkWithUserData.as_view({'post': 'put_data_user'})), 
     path('getcontract/', ClassPdf.as_view()), 
 
+    path('calculate/', Calculate.as_view({'post': 'get_calculate'})), 
     path('new-calculate/', Calculate.as_view({'post': 'create_sum'})), 
 
 
