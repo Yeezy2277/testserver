@@ -29,11 +29,11 @@ print(pathlib.Path(__file__).resolve().parent.parent)
 
 print(os.path.dirname(pathlib.Path(__file__).resolve().parent.parent)) 
 
-file_path = pathlib.Path(__file__).resolve().parent
-path = os.path.join(str(file_path) + '/temporary', 'wow.txt')
-os.remove(path)
+#file_path = pathlib.Path(__file__).resolve().parent
+#path = os.path.join(str(file_path) + '/temporary', 'wow.txt')
+#os.remove(path)
 
-print(file_path)
+#print(file_path)
 
 '''
 file_path = pathlib.Path(__file__).resolve().parent + /temporary 
@@ -52,4 +52,7 @@ pdf.output(file_path + имя_пользователя + номер_догово
 сохранение в бд
 удаление
 '''
+
+path = os.path.join(str(pathlib.Path(__file__).resolve().parent) + '/main.cpp')
+os.remove(path)
 

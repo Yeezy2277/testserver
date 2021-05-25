@@ -23,6 +23,7 @@ urlpatterns = [
 
 
     #test 
-    path('test-get-user/', test_header), 
     path('test-get-user-passport/', PassportView.as_view({'post': 'set_passport'})),
+    path('get-user-passport1/', PassportView.as_view({'get': 'get_photo1'})),
+    path('get-passport/', PassportView.as_view({'get': 'get_other'}))
 ]

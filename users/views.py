@@ -344,52 +344,104 @@ class ClassPdf(APIView):
 
         return FileResponse(open(settings.MEDIA_ROOT+'/'+contract.file.name, 'rb'))
 
-#it is security of header 
-#after tets 
-#i must to delete this function
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def test_header(request):
-    class MyJWTAuthentication(JWTAuthentication):
-        pass
-    
-    get_jwt_class = MyJWTAuthentication()
-    my_header = get_jwt_class.get_header(request)
-    my_raw_toekn = get_jwt_class.get_raw_token(my_header)
-    my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
-    my_user = get_jwt_class.get_user(my_valited_token)
-
-    print(my_user.username)
-
-
-
-    return Response(status=status.HTTP_200_OK)
-
 
 #for passprot photo 
 class PassportView(ViewSet):
     def set_passport(self, request):
         class MyJWTAuthentication(JWTAuthentication):
             pass
-
+    
         get_jwt_class = MyJWTAuthentication()
+        my_header = get_jwt_class.get_header(request)
+        my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+        my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+        my_user = get_jwt_class.get_user(my_valited_token)
 
-        passport_info = PassportInfoUser.objects.get(user=get_jwt_class.get_user(
-            get_jwt_class.get_validated_token(get_jwt_class.get_raw_token(get_jwt_class.get_header(
-                request
-            )))
-        ))
-        
+        saved_passport = PassportInfoUser.objects.get(user=my_user)        
+
         serializer = PassportInfoUserSerializer(
-            instance=passport_info, 
+            instance=saved_passport, 
             data=request.data, 
             partial=True
         )
-        
         if serializer.is_valid(raise_exception=True):
             serializer.save()
 
         return Response(status=status.HTTP_200_OK)
+    
+    def get_photo1(self, request):
+        try:
+            class MyJWTAuthentication(JWTAuthentication):
+                pass
+    
+            get_jwt_class = MyJWTAuthentication()
+            my_header = get_jwt_class.get_header(request)
+            my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+            my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+            my_user = get_jwt_class.get_user(my_valited_token)
+            
+            a_a = PassportInfoUser.objects.get(user=my_user)
+            
+
+            return FileResponse(open(a_a.passport_photo1.path, 'rb'))
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    def get_photo2(self, request):
+        try:
+            class MyJWTAuthentication(JWTAuthentication):
+                pass
+    
+            get_jwt_class = MyJWTAuthentication()
+            my_header = get_jwt_class.get_header(request)
+            my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+            my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+            my_user = get_jwt_class.get_user(my_valited_token)
+            
+            a_a = PassportInfoUser.objects.get(user=my_user)
+            
+
+            return FileResponse(open(a_a.passport_photo2.path, 'rb'))
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    def get_photo3(self, request):
+        try:
+            class MyJWTAuthentication(JWTAuthentication):
+                pass
+    
+            get_jwt_class = MyJWTAuthentication()
+            my_header = get_jwt_class.get_header(request)
+            my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+            my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+            my_user = get_jwt_class.get_user(my_valited_token)
+            
+            a_a = PassportInfoUser.objects.get(user=my_user)
+            
+
+            return FileResponse(open(a_a.passport_photo3.path, 'rb'))
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def get_other(self, request):
+        class MyJWTAuthentication(JWTAuthentication):
+                pass
+    
+        get_jwt_class = MyJWTAuthentication()
+        my_header = get_jwt_class.get_header(request)
+        my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+        my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+        my_user = get_jwt_class.get_user(my_valited_token)        
+
+        a_a = PassportInfoUser.objects.get(user=my_user)
+
+        return Response(data={
+            "passport_series": a_a.passport_series,
+            "passport_nomder": a_a.passport_nomder,
+            "passport_date": a_a.passport_date,
+            "passport_place": a_a.passport_place,
+            "passport_code": a_a.passport_code,
+        }, status=status.HTTP_200_OK)
 
 
 

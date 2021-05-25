@@ -1,3 +1,5 @@
+import os
+import pathlib
 from rest_framework import serializers
 from .models import (
     MainInfoUser, RegisterInfoUser, 
@@ -117,51 +119,47 @@ class RegisterInfoUserSerializer(serializers.ModelSerializer):
 
         return registerInfoUser
     
+
+class PassportInfoUserSerializer(serializers.ModelSerializer):
     
+    class Meta:
+        model = PassportInfoUser
+        fields = ['passport_series', 'passport_nomder', 
+            'passport_date', 'passport_place', 
+            'passport_code','passport_photo1', 
+            'passport_photo2', 'passport_photo3' 
+        ]
     
-
-class PassportInfoUserSerializer(serializers.Serializer):
-    user = serializers.CharField(required=False,default='some_default_value')
-    passport_series = serializers.IntegerField(required=False,default='some_default_value')
-    passport_nomder = serializers.IntegerField(required=False,default='some_default_value')
-    passport_date = serializers.DateField(required=False,default='some_default_value')
-    passport_place = serializers.CharField(required=False,default='some_default_value')
-    passport_code = serializers.CharField(required=False,default='some_default_value')
-    passport_photo1 = serializers.ImageField(required=False,default='some_default_value')
-    passport_photo2 = serializers.ImageField(required=False,default='some_default_value')
-    passport_photo3 = serializers.ImageField(required=False,default='some_default_value')
-
-
-    def create(self, validated_data):
-        new_pasport_info = PassportInfoUser()
-        new_pasport_info.user = User.objects.get(username=validated_data['user'])
-        new_pasport_info.passport_series = validated_data['passport_series']
-        new_pasport_info.passport_nomder = validated_data['passport_nomder']
-        new_pasport_info.passport_date = validated_data['passport_date']
-        new_pasport_info.passport_place = validated_data['passport_place']
-        new_pasport_info.passport_code = validated_data['passport_code']
-        new_pasport_info.passport_photo1 = validated_data['passport_photo1']
-        new_pasport_info.passport_photo2 = validated_data['passport_photo2']
-        new_pasport_info.passport_photo3 = validated_data['passport_photo3']
-
-
-        new_pasport_info.save()
-        return new_pasport_info
-
     def update(self, instance, validated_data):
+        instance.passport_series = validated_data['passport_series']
         instance.passport_nomder = validated_data['passport_nomder']
         instance.passport_date = validated_data['passport_date']
         instance.passport_place = validated_data['passport_place']
         instance.passport_code = validated_data['passport_code']
+
         try:
-            instance.passport_photo1 = validated_data['passport_photo1']
+            os.remove(instance.passport_photo1.path)
         except:
             pass
+        
+        try:
+            os.remove(instance.passport_photo2.path)
+        except:
+            pass
+
+        try:
+            os.remove(instance.passport_photo3.path)
+        except:
+            pass
+
+        instance.passport_photo1 = validated_data['passport_photo1']
         instance.passport_photo2 = validated_data['passport_photo2']
         instance.passport_photo3 = validated_data['passport_photo3']
-        
+
+
         instance.save()
         return instance
+
 
 class AdressInfoUserSerializer(serializers.ModelSerializer):
     user = UserSerializer()
