@@ -110,8 +110,17 @@ class RatingList(APIView):
 
 class Calculate(ViewSet):
     def get_calculate(self, request):
-        user_name = request.data.get('username')
-        rating = UserRating.objects.get(user=User.objects.get(username=user_name)).rating
+        class MyJWTAuthentication(JWTAuthentication):
+                pass
+    
+        get_jwt_class = MyJWTAuthentication()
+        my_header = get_jwt_class.get_header(request)
+        my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+        my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+        my_user = get_jwt_class.get_user(my_valited_token)
+        
+        
+        rating = UserRating.objects.get(user=my_user).rating
         
         
         if rating == 1:
@@ -157,7 +166,17 @@ class Calculate(ViewSet):
             }, status=status.HTTP_200_OK)
 
     def create_sum(self, request):
+        class MyJWTAuthentication(JWTAuthentication):
+                pass
+    
+        get_jwt_class = MyJWTAuthentication()
+        my_header = get_jwt_class.get_header(request)
+        my_raw_toekn = get_jwt_class.get_raw_token(my_header)
+        my_valited_token = get_jwt_class.get_validated_token(my_raw_toekn)
+        my_user = get_jwt_class.get_user(my_valited_token)
+
         data_debt = request.data.get('debt')
+        data_debt.update({"user": my_user.username})
         serializer = DebtSerializer(data=data_debt)
         this_debt = None
         if serializer.is_valid(raise_exception=True):
